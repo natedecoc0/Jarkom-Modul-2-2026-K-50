@@ -5,13 +5,15 @@
 | 1   | Marvelino Davas             | 5027251085 | Soal 11 - 20    |
 | 2   | Nathania Tiara Wahyudi      | 5027251089 | Soal 1 - 10     |
 
+---
+
 ### Soal 1: 
-Sebagai pusat kesadaran The Mesh, rootkit harus merentangkan koneksinya ke lima gerbang utama (Switch). Tetapkan alamat IP dan default gateway untuk seluruh Entitas, mulai dari para operator (alpha, beta, gamma), penjaga directory (prab, tedd), gerbang penyaring (abbey, penny), hingga repository (obladi, desmond, oblada, molly) sesuai dengan topologi pembagian switch yang dirancang.
+> Sebagai pusat kesadaran The Mesh, rootkit harus merentangkan koneksinya ke lima gerbang utama (Switch). Tetapkan alamat IP dan default gateway untuk seluruh Entitas, mulai dari para operator (alpha, beta, gamma), penjaga directory (prab, tedd), gerbang penyaring (abbey, penny), hingga repository (obladi, desmond, oblada, molly) sesuai dengan topologi pembagian switch yang dirancang.
 
 <img width="1028" height="825" alt="image" src="https://github.com/user-attachments/assets/e1dc7d85-7d81-4f06-bf5b-f6e27ff38981" />
 
+#### Konfigurasi rootkit
 
-Konfigurasi rootkit
 ```
 auto lo
 iface lo inet loopback
@@ -47,7 +49,7 @@ iface eth5 inet static
     netmask 255.255.255.248
 ```
 
-Konfigurasi tiap client:
+#### Konfigurasi tiap client:
 
 **alpha**
 
@@ -102,6 +104,7 @@ iface eth0 inet static
 ```
 
 **epsilon**
+
 ```
 auto lo
 iface lo inet loopback
@@ -217,38 +220,42 @@ iface eth0 inet static
     gateway 192.236.0.37
 ```
 
-Test node alpha
-```
+#### Test node alpha
+
+```bash
 ping -c 2 192.236.0.1
 ```
+
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/233146e5-bdb6-4c8b-8255-41fa0be5f528" />
 
 Sudah bisa tersambung ke rootkit
 
+---
+
 ### Soal 2:
-Meskipun The Mesh beroperasi dalam bayang-bayang, Rootkit menyadari bahwa Entitas di dalamnya masih membutuhkan asupan paket dari dunia luar. Buka jalur menuju NAT dengan memastikan antarmuka WAN di router rootkit aktif. Konfigurasikan NAT agar dapat meneruskan lalu lintas keluar bagi seluruh alamat internal, sehingga semua host di dalam jaringan dapat menjangkau internet publik menggunakan IP address.
+> Meskipun The Mesh beroperasi dalam bayang-bayang, Rootkit menyadari bahwa Entitas di dalamnya masih membutuhkan asupan paket dari dunia luar. Buka jalur menuju NAT dengan memastikan antarmuka WAN di router rootkit aktif. Konfigurasikan NAT agar dapat meneruskan lalu lintas keluar bagi seluruh alamat internal, sehingga semua host di dalam jaringan dapat menjangkau internet publik menggunakan IP address.
 
-Aktifkan IP forwarding agar router dapat meneruskan paket data dari jaringan internal ke luar
+#### Aktifkan IP forwarding agar router dapat meneruskan paket data dari jaringan internal ke luar
 
-```
+```bash
 sysctl -w net.ipv4.ip_forward=1
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/346626f9-59d9-4ded-ab3e-9d15a7551ff1" />
 
-Agar konfigurasi IP forwarding tetap aktif setelah sistem di-reboot, tambahkan parameternya ke file konfigurasi sistem
+#### Agar konfigurasi IP forwarding tetap aktif setelah sistem di-reboot, tambahkan parameternya ke file konfigurasi sistem
 
-```
+```bash
 echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
 ```
 
-Tambahkan aturan IPTables NAT (Masquerade) pada antarmuka WAN (eth0)
+#### Tambahkan aturan IPTables NAT (Masquerade) pada antarmuka WAN (eth0)
 
-```
+```bash
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 ```
 
-Perbarui blok konfigurasi eth0
+#### Perbarui blok konfigurasi eth0
 
 ```
 auto eth0
@@ -256,69 +263,70 @@ iface eth0 inet dhcp
     up iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 ```
 
-Coba ping 8.8.8.8 dari alpha
+#### Coba ping 8.8.8.8 dari alpha
 
-```
+```bash
 ping -c 2 8.8.8.8
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/581c7647-e73e-4f9d-886d-870c9df87c9d" />
 
-
+---
 
 ### Soal 3: 
-Jaringan rahasia tidak akan berfungsi tanpa sinkronisasi antar divisi. Pastikan seluruh Entitas dapat saling terhubung dan berkomunikasi lintas jalur (routing internal via rootkit berfungsi). Untuk menghindari fragmentasi saat persiapan, pastikan setiap host non-router menambahkan resolver 192.168.122.1 (tambah di file /etc/resolv.conf, kalau sudah pakai resolver itu tidak perlu memasukkan resolver google) saat antarmukanya aktif agar akses untuk mengunduh paket instalasi dari internet tersedia sejak awal beroperasi.
+> Jaringan rahasia tidak akan berfungsi tanpa sinkronisasi antar divisi. Pastikan seluruh Entitas dapat saling terhubung dan berkomunikasi lintas jalur (routing internal via rootkit berfungsi). Untuk menghindari fragmentasi saat persiapan, pastikan setiap host non-router menambahkan resolver 192.168.122.1 (tambah di file /etc/resolv.conf, kalau sudah pakai resolver itu tidak perlu memasukkan resolver google) saat antarmukanya aktif agar akses untuk mengunduh paket instalasi dari internet tersedia sejak awal beroperasi.
 
-Konfigurasi Resolver di Seluruh Node Non-Router
+#### Konfigurasi Resolver di Seluruh Node Non-Router
 
-```
+```bash
 echo "nameserver 192.168.122.1" > /etc/resolv.conf
 ```
 
-Update konfigurasi di semua node kecuali rootkit
+#### Update konfigurasi di semua node kecuali rootkit
 
 ```
 up echo "nameserver 192.168.122.1" > /etc/resolv.conf
 ```
 
-Restart Network Interface di console semua node non-router untuk menerapkan perubahan interface
+#### Restart Network Interface di console semua node non-router untuk menerapkan perubahan interface
 
-```
+```bash
 ifdown eth0 && ifup eth0
 ```
 
-Testing dari alpha ke obladi
+#### Testing dari alpha ke obladi
 
-```
+```bash
 ping -c 2 192.236.0.26
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/d6d91ba5-2f3f-41b2-94bd-bd8bb8a5e511" />
 
 
-Testing ke google.com
+#### Testing ke google.com
 
-```
+```bash
 ping -c 2 google.com
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/c68b0cdb-8aeb-445e-b9ef-50c7ec6f893c" />
 
-Memperbarui daftar paket dari repositori tiap node
+#### Memperbarui daftar paket dari repositori tiap node
 
-```
+```bash
 apk update
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/c666e681-ee08-4a63-b03f-0c6297e585b3" />
 
+---- 
 
 ### Soal 4: 
-Penjaga Direktori mulai menuliskan hukum The Mesh. Pada node prab, bangun zona <xxxx>.com sebagai authoritative dengan SOA yang menunjuk ke prab.<xxxx>.com, serta tambahkan catatan NS untuk prab.<xxxx>.com dan tedd.<xxxx>.com. Buat A record untuk prab.<xxxx>.com dan tedd.<xxxx>.com yang mengarah ke alamat IP mereka masing-masing, serta A record apex <xxxx>.com yang mengarah ke gerbang aplikasi dinamis (penny). Aktifkan fitur notify dan allow-transfer ke tedd, lalu set forwarders ke 192.168.122.1. Di node tedd, tarik zona <xxxx>.com dari master dan pastikan server menjawab secara authoritative. Setelah fondasi nama ini berdiri kokoh, perbarui urutan resolver pada seluruh Entitas non-router menjadi: IP prab, IP tedd, lalu 192.168.122.1. Verifikasi bahwa query ke domain apex maupun hostname di dalam zona dijawab dengan benar oleh prab atau tedd.
+> Penjaga Direktori mulai menuliskan hukum The Mesh. Pada node prab, bangun zona <xxxx>.com sebagai authoritative dengan SOA yang menunjuk ke prab.<xxxx>.com, serta tambahkan catatan NS untuk prab.<xxxx>.com dan tedd.<xxxx>.com. Buat A record untuk prab.<xxxx>.com dan tedd.<xxxx>.com yang mengarah ke alamat IP mereka masing-masing, serta A record apex <xxxx>.com yang mengarah ke gerbang aplikasi dinamis (penny). Aktifkan fitur notify dan allow-transfer ke tedd, lalu set forwarders ke 192.168.122.1. Di node tedd, tarik zona <xxxx>.com dari master dan pastikan server menjawab secara authoritative. Setelah fondasi nama ini berdiri kokoh, perbarui urutan resolver pada seluruh Entitas non-router menjadi: IP prab, IP tedd, lalu 192.168.122.1. Verifikasi bahwa query ke domain apex maupun hostname di dalam zona dijawab dengan benar oleh prab atau tedd.
 
-1. Install paket di prab dan tedd
+#### Install paket di prab dan tedd
 
-```
+```bash
 apk add bind bind-tools
 ```
 
@@ -327,9 +335,9 @@ apk add bind bind-tools
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/9748e64f-381a-428c-80d6-37b371d3fc56" />
 
 
-[Console: alpha] dan [Console: delta] (untuk dig dan nslookup)
+#### Jalankan di alpha dan delta untuk dig dan nslookup
 
-```
+```bash
 apk add bind-tools
 ```
 
@@ -337,9 +345,9 @@ apk add bind-tools
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/dea2713d-7ab0-436a-b8d5-b124d5fbb974" />
 
-2. Konfigurasi master
+#### Konfigurasi master
 
-```
+```bash
 mkdir -p /var/bind/pri /var/bind/sec
 
 cat > /etc/bind/named.conf << 'EOF'
@@ -406,9 +414,9 @@ named-checkzone K50.com /var/bind/pri/K50.com.zone
 
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/680473b3-80ae-417d-b6f5-c9ab2c0ddadc" />
 
-3. Konfigurasi Slave
+#### Konfigurasi Slave
 
-```
+```bash
 mkdir -p /var/bind/pri /var/bind/sec
 
 cat > /etc/bind/named.conf << 'EOF'
@@ -451,11 +459,11 @@ named-checkconf /etc/bind/named.conf && echo "named.conf OK"
 
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/bb4516e4-dfae-4fbf-80b0-6ddeb8317b2c" />
 
-4. Jalankan konfigurasi di prab dan tedd
+#### Jalankan konfigurasi di prab dan tedd
 
-prab
+**prab**
 
-```
+```bash
 mkdir -p /var/run/named
 chown named:named /var/run/named
 named -u named -c /etc/bind/named.conf
@@ -468,9 +476,9 @@ netstat -ulnp | grep :53
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/9feb2d41-18d0-4f33-86de-810704e7a64f" />
 
-tedd
+**tedd**
 
-```
+```bash
 mkdir -p /var/run/named
 chown named:named /var/run/named
 named -u named -c /etc/bind/named.conf
@@ -485,9 +493,9 @@ ls -l /var/bind/sec/
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/57512542-bd6b-4553-9c93-37d2ad852045" />
 
-5. Ganti resolver di 13 node non-router
+#### Ganti resolver di 13 node non-router
 
-```
+```bash
 # 1. Hapus baris resolv.conf lama di interfaces, lalu tambahkan yang baru
 sed -i '/resolv.conf/d' /etc/network/interfaces
 cat >> /etc/network/interfaces << 'EOF'
@@ -517,9 +525,9 @@ cat /etc/resolv.conf
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/f7fe31a8-d6a6-4a45-97ff-005510511abc" />
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/4fb3d033-3512-4ec6-b99d-cad1f1346519" />
 
-6. Testing di alpha
+#### Testing di alpha
 
-```
+```bash
 echo "===== Query ke prab (master) ====="
 dig @192.236.0.18 K50.com A +noall +answer
 echo "===== Query NS ke tedd (slave) ====="
@@ -534,12 +542,14 @@ ping -c 2 google.com
 
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/f62ec9db-904e-443f-aa8b-03bb90c002cd" />
 
+---
+
 ### Soal 5: 
-"Entitas tanpa identitas adalah anomali," pesan Rootkit. Namai semua Entitas (hostname) sesuai glosarium: rootkit, alpha, beta, gamma, delta, epsilon, prab, tedd, abbey, penny, obladi, desmond, oblada, molly, dan verifikasi bahwa setiap host mengenali hostname tersebut secara system-wide. Buat setiap domain untuk masing-masing node sesuai dengan namanya (contoh: alpha.<xxxx>.com) dan assign IP masing-masing juga. Lakukan pengecualian untuk node yang bertanggung jawab atas prab dan tedd.
+> "Entitas tanpa identitas adalah anomali," pesan Rootkit. Namai semua Entitas (hostname) sesuai glosarium: rootkit, alpha, beta, gamma, delta, epsilon, prab, tedd, abbey, penny, obladi, desmond, oblada, molly, dan verifikasi bahwa setiap host mengenali hostname tersebut secara system-wide. Buat setiap domain untuk masing-masing node sesuai dengan namanya (contoh: alpha.<xxxx>.com) dan assign IP masing-masing juga. Lakukan pengecualian untuk node yang bertanggung jawab atas prab dan tedd.
 
-1. Buat script hostname di semua node termasuk rootkit
+#### Buat script hostname di semua node termasuk rootkit
 
-```
+```bash
 cat > /root/set-host.sh << 'EOF'
 #!/bin/sh
 # Pemakaian: sh /root/set-host.sh <nama> <ip>
@@ -565,125 +575,125 @@ EOF
 chmod +x /root/set-host.sh
 ```
 
-2. Jalankan command di tiap node
+#### Jalankan command di tiap node
 
-rootkit
+**rootkit**
 
-```
+```bash
 sh /root/set-host.sh rootkit 192.236.0.1
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/3acc9fbb-dbfb-4c32-b9a6-7f2849a00ad2" />
 
-alpha
+**alpha**
 
-```
+```bash
 sh /root/set-host.sh alpha 192.236.0.2
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/7556ab07-9c18-4b62-a1f9-5ca30d25fd54" />
 
-beta
+**beta**
 
-```
+```bash
 sh /root/set-host.sh beta 192.236.0.3
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/b373d33e-4a44-463d-a954-74bdabf00b3e" />
 
-gamma
+**gamma**
 
-```
+```bash
 sh /root/set-host.sh gamma 192.236.0.4
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/386445e7-ba64-4c05-81b5-19551ca22d29" />
 
-delta
+**delta**
 
-```
+```bash
 sh /root/set-host.sh delta 192.236.0.10
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/1f13f0a7-96ff-468f-88e0-db922de2f0ab" />
 
-epsilon
+**epsilon**
 
-```
+```bash
 sh /root/set-host.sh epsilon 192.236.0.11
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/600dbafd-30a1-4114-b613-f4bf5a65bd2b" />
 
 
-prab
+**prab**
 
-```
+```bash
 sh /root/set-host.sh prab 192.236.0.18
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/61780f78-e5d8-4606-a17a-92ae63f3d56c" />
 
-tedd
+**tedd**
 
-```
+```bash
 sh /root/set-host.sh tedd 192.236.0.19
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/e957d8bd-1954-4594-b741-4fd81d6c73dd" />
 
-obladi
+**obladi**
 
-```
+```bash
 sh /root/set-host.sh obladi 192.236.0.26
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/9e33d215-bdb8-49e1-a10b-5b5cccfd61fd" />
 
-desmond
+**desmond**
 
-```
+```bash
 sh /root/set-host.sh desmond 192.236.0.27
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/dc188bc8-c1cb-4494-aa6f-426fce649996" />
 
-oblada
+**oblada**
 
-```
+```bash
 sh /root/set-host.sh oblada 192.236.0.28
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/996a1dff-e9a0-4ae0-9d32-edf8943d0ac6" />
 
-molly
+**molly**
 
-```
+```bash
 sh /root/set-host.sh molly 192.236.0.29
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/c8ee2e5c-ca41-427c-be86-d02cedbcc449" />
 
-abbey
+**abbey**
 
-```
+```bash
 sh /root/set-host.sh abbey 192.236.0.34
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/318c289e-136a-4d29-8a45-71d92cbc2442" />
 
-penny
+**penny**
 
-```
+```bash
 sh /root/set-host.sh penny 192.236.0.38
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/a886efc7-918e-476e-b567-f476020411ea" />
 
-3. Tambah A record di DNS master
+#### Tambah A record di DNS master
 Zone file ditulis ulang utuh dengan serial naik ke 2026092902. Serial harus naik supaya tedd mau menarik data baru.
 
-```
+```bash
 cat > /var/bind/pri/K50.com.zone << 'EOF'
 $TTL 3600
 @       IN      SOA     prab.K50.com. root.K50.com. (
@@ -742,9 +752,9 @@ dig SOA K50.com @192.236.0.18 +short
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/d548d59b-5811-471c-9c82-f48e84a95535" />
 
-4. Cek sinkron ke slave
+#### Cek sinkron ke slave
 
-```
+```bash
 sleep 3
 dig SOA K50.com @192.236.0.19 +short
 grep -c "IN" /var/bind/sec/K50.com.zone
@@ -753,9 +763,9 @@ cat /var/bind/sec/K50.com.zone
 
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/107d5d1f-cf8a-47e4-99a2-1e9b270a0eff" />
 
-5. Verifikasi di alpha
+#### Verifikasi di alpha
 
-```
+```bash
 echo "===== hostname ====="
 hostname
 hostname -f
@@ -774,13 +784,14 @@ ping -c 2 obladi.K50.com
 
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/a4fda822-4aa5-4721-9936-15743131df90" />
 
+---
 
 ### Soal 6: Verifikasi Zone Transfer dan Sinkronisasi SOA
-Pastikan zone transfer berjalan, pastikan tedd telah menerima salinan zona terbaru dari prab. Nilai serial SOA di keduanya harus sama karena keduanya tidak bisa dipisahkan dan saling melengkapi.
+> Pastikan zone transfer berjalan, pastikan tedd telah menerima salinan zona terbaru dari prab. Nilai serial SOA di keduanya harus sama karena keduanya tidak bisa dipisahkan dan saling melengkapi.
 
-1. Restart BIND di prab
+#### Restart BIND di prab
 
-```
+```bash
 killall named
 sleep 1
 mkdir -p /var/run/named
@@ -794,9 +805,9 @@ dig SOA K50.com @127.0.0.1 +short
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/328cbea0-71b5-4544-9867-c5a4d5684376" />
 
-2. Di console tedd, restart BIND dan hapus salinan lama. Salinan dihapus supaya terbukti tedd menarik ulang dari prab, bukan membaca file lama.
+#### Di console tedd, restart BIND dan hapus salinan lama. Salinan dihapus supaya terbukti tedd menarik ulang dari prab, bukan membaca file lama.
 
-```
+```bash
 killall named
 sleep 1
 rm -f /var/bind/sec/K50.com.zone
@@ -805,9 +816,9 @@ ls -l /var/bind/sec/
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/e52ce3ea-0807-4f69-b1bf-53feaa9c12fd" />
 
-Jalankan named di tedd
+#### Jalankan named di tedd
 
-```
+```bash
 mkdir -p /var/run/named
 chown named:named /var/run/named
 named -u named -c /etc/bind/named.conf
@@ -818,45 +829,45 @@ ls -l /var/bind/sec/
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/91fdb25c-4a45-48f1-b0e8-044ba88cccd1" />
 
-Lihat isi file hasil transfer di tedd
+#### Lihat isi file hasil transfer di tedd
 
-```
+```bash
 cat /var/bind/sec/K50.com.zone
 ```
 
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/fc9572b4-b795-4cf7-9f8c-f95b8f10a316" />
 
-3. Bandingkan SOA dari kedua server di alpha
+#### Bandingkan SOA dari kedua server di alpha
 
-```
+```bash
 dig SOA K50.com @192.236.0.18 +short
 dig SOA K50.com @192.236.0.19 +short
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/d3acc734-0202-4e4e-8236-a2b379249d7a" />
 
-Tampilkan serial saja di alpha
+#### Tampilkan serial saja di alpha
 
-```
+```bash
 for s in 192.236.0.18 192.236.0.19; do echo -n "$s -> serial "; dig +short SOA K50.com @$s | awk '{print $3}'; done
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/474badf5-bb07-4893-a04e-4ae1b2ca7e80" />
 
-Buktikan kedua server menjawab sebagai authoritative (flag aa)
+#### Buktikan kedua server menjawab sebagai authoritative (flag aa)
 
-```
+```bash
 dig @192.236.0.18 K50.com SOA | grep flags
 dig @192.236.0.19 K50.com SOA | grep flags
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/68c3beb6-6bbf-4208-89f3-0d89cff833b5" />
 
-4. Uji pembatasan AXFR. prab hanya mengizinkan transfer ke tedd
+#### Uji pembatasan AXFR. prab hanya mengizinkan transfer ke tedd
 
 Di console tedd (harus diizinkan)
 
-```
+```bash
 dig AXFR K50.com @192.236.0.18
 ```
 
@@ -864,22 +875,23 @@ dig AXFR K50.com @192.236.0.18
 
 Di console alpha (harus ditolak)
 
-```
+```bash
 dig AXFR K50.com @192.236.0.18
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/67fa62d7-d5fc-4df6-8b7f-3252bb89f9e8" />
 
+---
 
 ### Soal 7: 
-abbey dan penny sebagai gerbang utama, obladi dan desmond sebagai web statis, oblada dan molly sebagai web dinamis. Tambahkan pada zona <xxxx>.com A record untuk vault.<xxxx>.com (IP obladi & desmond), dan core.<xxxx>.com (IP oblada & molly). Tetapkan CNAME:
+> abbey dan penny sebagai gerbang utama, obladi dan desmond sebagai web statis, oblada dan molly sebagai web dinamis. Tambahkan pada zona <xxxx>.com A record untuk vault.<xxxx>.com (IP obladi & desmond), dan core.<xxxx>.com (IP oblada & molly). Tetapkan CNAME:
 www.<xxxx>.com → penny.<xxxx>.com
 static.<xxxx>.com → abbey.<xxxx>.com
 Verifikasi dari dua klien berbeda bahwa seluruh hostname tersebut ter-resolve ke tujuan yang benar dan konsisten.
 
-1. Edit zona di console prab
+#### Edit zona di console prab
 
-```
+```bash
 nano /var/bind/pri/K50.com.zone
 ```
 
@@ -940,9 +952,9 @@ www     IN      CNAME   penny.K50.com.
 static  IN      CNAME   abbey.K50.com.
 ```
 
-2. Cek sintaks lalu reload
+#### Cek sintaks lalu reload
 
-```
+```bash
 named-checkzone K50.com /var/bind/pri/K50.com.zone
 kill -HUP $(pidof named)
 sleep 3
@@ -951,9 +963,9 @@ dig SOA K50.com @127.0.0.1 +short
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/54b055ab-ceef-4784-aaec-75a6abc0bbf1" />
 
-3. Pastikan salinan sudah ikut naik di console tedd
+#### Pastikan salinan sudah ikut naik di console tedd
 
-```
+```bash
 sleep 3
 dig SOA K50.com @127.0.0.1 +short
 grep -E "vault|core|www|static" /var/bind/sec/K50.com.zone
@@ -961,9 +973,11 @@ grep -E "vault|core|www|static" /var/bind/sec/K50.com.zone
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/c7bef0ff-0b44-4864-bd92-8990f2786635" />
 
-4. Di console alpha (Sayap Kiri), uji round-robin. Tiap dig adalah query baru, jadi urutan jawaban berputar
+#### Di console alpha (Sayap Kiri), uji round-robin. 
 
-```
+Tiap dig adalah query baru, jadi urutan jawaban berputar
+
+```bash
 for i in 1 2 3 4; do echo "--- vault query $i ---"; dig vault.K50.com +short; done
 ```
 
@@ -971,24 +985,24 @@ for i in 1 2 3 4; do echo "--- vault query $i ---"; dig vault.K50.com +short; do
 
 Titik awal rotasi bisa berbeda (mulai dari .27), yang penting urutannya berganti antar query.
 
-```
+```bash
 for i in 1 2 3 4; do echo "--- core query $i ---"; dig core.K50.com +short; done
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/63b3e05d-0a25-41ab-97b6-5f4144764f1d" />
 
-5. Uji CNAME di alpha
+#### Uji CNAME di alpha
 
-```
+```bash
 dig www.K50.com +noall +answer
 dig static.K50.com +noall +answer
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/cd0e35e4-51df-4219-8f99-aa60466c286a" />
 
-6. Masih di alpha, uji dengan nslookup dan ping
+#### Masih di alpha, uji dengan nslookup dan ping
 
-```
+```bash
 nslookup www.K50.com
 nslookup static.K50.com
 nslookup vault.K50.com
@@ -997,9 +1011,9 @@ ping -c 2 www.K50.com
 
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/6751e382-50f1-400e-b556-1132bc7e5c04" />
 
-7. Di console delta (Sayap Kanan), jalankan uji yang sama. Jika dig belum ada, install dulu apk add bind-tools
+#### Di console delta (Sayap Kanan), jalankan uji yang sama. Jika dig belum ada, install dulu apk add bind-tools
 
-```
+```bash
 for i in 1 2 3 4; do echo "--- vault query $i ---"; dig vault.K50.com +short; done
 for i in 1 2 3 4; do echo "--- core query $i ---"; dig core.K50.com +short; done
 dig www.K50.com +noall +answer
@@ -1009,9 +1023,9 @@ nslookup www.K50.com
 
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/c8d0ab16-fde9-4fce-acc6-8a000dd8b213" />
 
-8. Di console alpha, pastikan tedd (slave) menjawab sama seperti prab
+#### Di console alpha, pastikan tedd (slave) menjawab sama seperti prab
 
-```
+```bash
 dig vault.K50.com @192.236.0.19 +short
 dig core.K50.com @192.236.0.19 +short
 dig www.K50.com @192.236.0.19 +noall +answer
@@ -1020,13 +1034,14 @@ dig static.K50.com @192.236.0.19 +noall +answer
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/f94db6cb-6c0f-4ad3-853b-226417f7fcf7" />
 
+---
 
 ### Soal 8: Reverse DNS Zone (PTR Record)
-Di prab (ns1) deklarasikan reverse zone untuk segmen jaringan  tempat abbey, penny, area vault, dan area core berada. Di tedd (ns2) tarik reverse zone tersebut sebagai slave, isi PTR untuk keempat hostname itu agar pencarian balik IP address mengembalikan hostname yang benar, lalu pastikan query reverse untuk alamat abbey, penny, area vault, dan area core dijawab authoritative.
+> Di prab (ns1) deklarasikan reverse zone untuk segmen jaringan  tempat abbey, penny, area vault, dan area core berada. Di tedd (ns2) tarik reverse zone tersebut sebagai slave, isi PTR untuk keempat hostname itu agar pencarian balik IP address mengembalikan hostname yang benar, lalu pastikan query reverse untuk alamat abbey, penny, area vault, dan area core dijawab authoritative.
 
-1. Di console prab, tambahkan deklarasi zona
+#### Di console prab, tambahkan deklarasi zona
 
-```
+```bash
 nano /etc/bind/named.conf
 ```
 
@@ -1042,9 +1057,9 @@ zone "0.236.192.in-addr.arpa" IN {
 };
 ```
 
-2. Masih di prab, buat file zona reverse
+#### Masih di prab, buat file zona reverse
 
-```
+```bash
 nano /var/bind/pri/0.236.192.in-addr.arpa.zone
 ```
 
@@ -1074,9 +1089,9 @@ $TTL 3600
 
 Angka di kolom pertama adalah oktet terakhir IP. Serial 2026092901 berdiri sendiri karena ini zona baru, terpisah dari zona K50.com. Nama tujuan PTR wajib FQDN berakhiran titik.
 
-3. Masih di prab, atur izin, cek sintaks, lalu reload
+#### Masih di prab, atur izin, cek sintaks, lalu reload
 
-```
+```bash
 chown named:named /var/bind/pri/0.236.192.in-addr.arpa.zone
 chmod 644 /var/bind/pri/0.236.192.in-addr.arpa.zone
 named-checkconf /etc/bind/named.conf && echo "named.conf OK"
@@ -1088,7 +1103,7 @@ dig SOA 0.236.192.in-addr.arpa @127.0.0.1 +short
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/5684fbf2-753d-4221-ae08-fa9e5c1b24d6" />
 
-4. Di console tedd, tambahkan deklarasi zona slave
+#### Di console tedd, tambahkan deklarasi zona slave
 
 ```
 nano /etc/bind/named.conf
@@ -1105,9 +1120,9 @@ zone "0.236.192.in-addr.arpa" IN {
 };
 ```
 
-5. Masih di tedd, cek sintaks, reload, lalu cek file hasil transfer
+#### Masih di tedd, cek sintaks, reload, lalu cek file hasil transfer
 
-```
+```bash
 named-checkconf /etc/bind/named.conf && echo "named.conf OK"
 kill -HUP $(pidof named)
 sleep 5
@@ -1117,17 +1132,17 @@ dig SOA 0.236.192.in-addr.arpa @127.0.0.1 +short
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/5e1d0a0e-4825-4c5b-ab35-fb1f3bc37c2a" />
 
-6. Di console tedd, lihat isi zona hasil transfer
+#### Di console tedd, lihat isi zona hasil transfer
 
-```
+```bash
 cat /var/bind/sec/0.236.192.in-addr.arpa.zone
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/3a60dc8e-1e5f-4a79-924d-ddfa66e3e05a" />
 
-7. Di console alpha, uji satu PTR dengan dig -x
+#### Di console alpha, uji satu PTR dengan dig -x
 
-```
+```bash
 dig -x 192.236.0.34
 ```
 
@@ -1135,33 +1150,33 @@ dig -x 192.236.0.34
 
 Flag aa berarti dijawab authoritative oleh prab.
 
-8. Masih di alpha, uji semua enam PTR lewat prab
+#### Masih di alpha, uji semua enam PTR lewat prab
 
-```
+```bash
 for ip in 192.236.0.34 192.236.0.38 192.236.0.26 192.236.0.27 192.236.0.28 192.236.0.29; do echo -n "$ip -> "; dig -x $ip @192.236.0.18 +short; done
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/612eb9b9-e4a9-4696-b718-def9c644ae9f" />
 
-9. Masih di alpha, ulangi lewat tedd untuk membuktikan slave menjawab sama
+#### Masih di alpha, ulangi lewat tedd untuk membuktikan slave menjawab sama
 
-```
+```bash
 for ip in 192.236.0.34 192.236.0.38 192.236.0.26 192.236.0.27 192.236.0.28 192.236.0.29; do echo -n "$ip -> "; dig -x $ip @192.236.0.19 +short; done
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/91bc5470-b496-43c1-b231-1bd8364d4d9a" />
 
-10. Masih di alpha, bandingkan serial SOA reverse di kedua server
+#### Masih di alpha, bandingkan serial SOA reverse di kedua server
 
-```
+```bash
 for s in 192.236.0.18 192.236.0.19; do echo -n "$s -> serial "; dig +short SOA 0.236.192.in-addr.arpa @$s | awk '{print $3}'; done
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/5f123135-92b6-47d6-8d0f-7e99317dc554" />
 
-11. Masih di alpha, uji dengan nslookup dan IP yang belum punya PTR
+#### Masih di alpha, uji dengan nslookup dan IP yang belum punya PTR
 
-```
+```bash
 nslookup 192.236.0.29
 nslookup 192.236.0.18
 ```
@@ -1177,15 +1192,16 @@ PTR: .34 abbey, .38 penny, .26 obladi, .27 desmond, .28 oblada, .29 molly
 Serial SOA reverse: 2026092901 di prab dan tedd
 File hasil transfer: /var/bind/sec/0.236.192.in-addr.arpa.zone di tedd
 
+---
 
 ### Soal 9:
-Jalankan layanan web statis pada hostname di node area vault (menggunakan apache). Buka folder direktori /arsip/ dan aktifkan fitur autoindex (directory listing) pada konfigurasi Apache sehingga seluruh daftar file di dalamnya dapat ditelusuri langsung dari browser. Akses pengujian harus dilakukan melalui hostname, bukan IP address.
+> Jalankan layanan web statis pada hostname di node area vault (menggunakan apache). Buka folder direktori /arsip/ dan aktifkan fitur autoindex (directory listing) pada konfigurasi Apache sehingga seluruh daftar file di dalamnya dapat ditelusuri langsung dari browser. Akses pengujian harus dilakukan melalui hostname, bukan IP address.
 
 Apache dipasang di obladi dan desmond (area vault). Folder /arsip/ dibuat di document root dengan autoindex aktif, lalu diuji lewat hostname.
 
-1. Install Apache di obladi dan desmond
+#### Install Apache di obladi dan desmond
 
-```
+```bash
 apk add apache2 curl
 ```
 
@@ -1193,11 +1209,11 @@ apk add apache2 curl
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/587a90cf-dfff-4535-b5ec-21beb06c02f4" />
 
-2. Buat folder /arsip/ dan isinya
+#### Buat folder /arsip/ dan isinya
 
-obladi 
+**obladi** 
 
-```
+```bash
 mkdir -p /var/www/localhost/htdocs/arsip
 echo "laporan dari obladi" > /var/www/localhost/htdocs/arsip/laporan.txt
 echo "catatan dari obladi" > /var/www/localhost/htdocs/arsip/catatan.txt
@@ -1207,9 +1223,9 @@ ls -l /var/www/localhost/htdocs/arsip
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/5349f5b3-3f1b-4a8e-8ffe-1c60bd1b28c7" />
 
-desmond
+**desmond**
 
-```
+```bash
 mkdir -p /var/www/localhost/htdocs/arsip
 echo "laporan dari desmond" > /var/www/localhost/htdocs/arsip/laporan.txt
 echo "catatan dari desmond" > /var/www/localhost/htdocs/arsip/catatan.txt
@@ -1219,9 +1235,9 @@ ls -l /var/www/localhost/htdocs/arsip
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/10967451-1033-4966-81bf-ac222dcee5b4" />
 
-3. Aktifkan autoindex
+#### Aktifkan autoindex
 
-```
+```bash
 cat > /etc/apache2/conf.d/arsip.conf << 'EOF'
 <Directory "/var/www/localhost/htdocs/arsip">
     Options +Indexes
@@ -1240,9 +1256,9 @@ httpd -t
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/a3de387c-22df-4693-a69c-9cbb52d730f3" />
 
-4. Jalankan Apache
+#### Jalankan Apache
 
-```
+```bash
 mkdir -p /run/apache2
 httpd
 sleep 2
@@ -1254,41 +1270,41 @@ netstat -tlnp | grep :80
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/a8cc4aa8-c413-47c2-a06b-5444fcde9663" />
 
-5. Uji per hostname
+#### Uji per hostname
 
-```
+```bash 
 curl -s http://obladi.K50.com/arsip/
 curl -s http://desmond.K50.com/arsip/
 ```
 
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/5df62d50-5d8a-4b6e-911b-9b24a288b356" />
 
-```
+```bash
 curl -s http://obladi.K50.com/arsip/laporan.txt
 curl -s http://desmond.K50.com/arsip/laporan.txt
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/3a2fed7e-3e31-43c8-8589-0b8a590f6aac" />
 
-6. Uji lewat hostname vault (round-robin DNS)
+#### Uji lewat hostname vault (round-robin DNS)
 
-```
+```bash
 for i in 1 2 3 4; do curl -s http://vault.K50.com/arsip/laporan.txt; done
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/e16dfeaa-0d12-493d-af9d-4cc7f12060ac" />
 
-7. Cek status HTTP
+#### Cek status HTTP
 
-```
+```bash
 curl -I http://vault.K50.com/arsip/
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/ed3038b2-4003-41bd-a5c4-fec0c76cab86" />
 
-8. Uji dari klien lain (delta)
+#### Uji dari klien lain (delta)
 
-```
+```bash
 apk add curl
 curl -s http://vault.K50.com/arsip/
 curl -s http://obladi.K50.com/arsip/catatan.txt
@@ -1297,15 +1313,16 @@ curl -s http://desmond.K50.com/arsip/data.txt
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/19892ed4-d387-4986-a2b3-14e68fff72c9" />
 
+---
 
 ### Soal 10:
-Jalankan layanan web dinamis (PHP-FPM) pada hostname di node core (menggunakan nginx). Buat sebuah aplikasi sederhana yang memuat halaman beranda dan halaman profil. Terapkan aturan rewrite pada server sehingga akses ke /profil dapat berfungsi dengan URL bersih (tanpa akhiran .php). Akses pengujian wajib dilakukan melalui hostname.
+> Jalankan layanan web dinamis (PHP-FPM) pada hostname di node core (menggunakan nginx). Buat sebuah aplikasi sederhana yang memuat halaman beranda dan halaman profil. Terapkan aturan rewrite pada server sehingga akses ke /profil dapat berfungsi dengan URL bersih (tanpa akhiran .php). Akses pengujian wajib dilakukan melalui hostname.
 
 Nginx dan PHP-FPM dipasang di oblada dan molly (area core). Aplikasi punya halaman beranda dan profil, dan /profil bisa diakses tanpa .php lewat rewrite. Pengujian dilakukan lewat hostname.
 
-1. Perbarui indeks paket dan install Nginx serta PHP-FPM
+#### Perbarui indeks paket dan install Nginx serta PHP-FPM
 
-```
+```bash
 apk update
 PHPV=php85
 apk add nginx $PHPV $PHPV-fpm
@@ -1315,9 +1332,9 @@ apk add nginx $PHPV $PHPV-fpm
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/611477a8-ee45-4719-81d4-e3c3096051b1" />
 
-2. Buat aplikasi sederhana
+#### Buat aplikasi sederhana
 
-```
+```bash
 mkdir -p /var/www/html
 
 cat > /var/www/html/index.php << 'EOF'
@@ -1353,9 +1370,9 @@ ls -l /var/www/html
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/09f85556-93b1-4a83-9930-4140a5d02b02" />
 
-3. Konfigurasi Nginx
+#### Konfigurasi Nginx
 
-```
+```bash
 rm -f /etc/nginx/http.d/default.conf
 
 cat > /etc/nginx/http.d/core.conf << 'EOF'
@@ -1387,9 +1404,9 @@ nginx -t
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/98892a88-c293-4fc0-808c-3b86f04c532e" />
 
-4. Jalankan PHP-FPM dan Nginx
+#### Jalankan PHP-FPM dan Nginx
 
-```
+```bash
 grep -E "^listen|^user" /etc/php85/php-fpm.d/www.conf
 php-fpm85
 mkdir -p /run/nginx
@@ -1403,9 +1420,9 @@ netstat -tlnp | grep -E ":80|:9000"
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/3f821584-478b-419e-902f-7e47ef5c381d" />
 
-5. Uji beranda per hostname (alpha)
+#### Uji beranda per hostname (alpha)
 
-```
+```bash
 apk add curl
 curl -s http://oblada.K50.com/
 curl -s http://molly.K50.com/
@@ -1413,9 +1430,9 @@ curl -s http://molly.K50.com/
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/b08c30dc-1cbd-4a17-963e-ca300c339a40" />
 
-6. Uji URL bersih /profil (alpha)
+#### Uji URL bersih /profil (alpha)
 
-```
+```bash
 curl -s http://oblada.K50.com/profil
 curl -s http://molly.K50.com/profil
 curl -s -o /dev/null -w "%{http_code}\n" http://core.K50.com/profil
@@ -1424,17 +1441,17 @@ curl -s -o /dev/null -w "%{http_code}\n" http://core.K50.com/tidakada
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/5bb078b7-d2a7-4fe6-949c-10f2d98df0d7" />
 
-7. Uji lewat hostname core (round-robin)
+#### Uji lewat hostname core (round-robin)
 
-```
+```bash
 for i in 1 2 3 4; do curl -s http://core.K50.com/ | grep "Dilayani"; done
 ```
 
 <img width="745" height="521" alt="image" src="https://github.com/user-attachments/assets/92aa68e1-bdbf-4390-93fc-bc72fd355ad3" />
 
-8. Uji dari klien lain (delta)
+#### Uji dari klien lain (delta)
 
-```
+```bash
 apk add curl
 curl -s http://core.K50.com/
 curl -s http://core.K50.com/profil
