@@ -7,7 +7,7 @@
 
 ---
 
-### Soal 1: 
+### Soal 1: Penetapan Alamat IP dan Gateway (Topologi Jaringan)
 > Sebagai pusat kesadaran The Mesh, rootkit harus merentangkan koneksinya ke lima gerbang utama (Switch). Tetapkan alamat IP dan default gateway untuk seluruh Entitas, mulai dari para operator (alpha, beta, gamma), penjaga directory (prab, tedd), gerbang penyaring (abbey, penny), hingga repository (obladi, desmond, oblada, molly) sesuai dengan topologi pembagian switch yang dirancang.
 
 <img width="1028" height="825" alt="image" src="https://github.com/user-attachments/assets/e1dc7d85-7d81-4f06-bf5b-f6e27ff38981" />
@@ -232,7 +232,7 @@ Sudah bisa tersambung ke rootkit
 
 ---
 
-### Soal 2:
+### Soal 2: Konfigurasi NAT dan Akses Internet (WAN)
 > Meskipun The Mesh beroperasi dalam bayang-bayang, Rootkit menyadari bahwa Entitas di dalamnya masih membutuhkan asupan paket dari dunia luar. Buka jalur menuju NAT dengan memastikan antarmuka WAN di router rootkit aktif. Konfigurasikan NAT agar dapat meneruskan lalu lintas keluar bagi seluruh alamat internal, sehingga semua host di dalam jaringan dapat menjangkau internet publik menggunakan IP address.
 
 #### Aktifkan IP forwarding agar router dapat meneruskan paket data dari jaringan internal ke luar
@@ -273,7 +273,7 @@ ping -c 2 8.8.8.8
 
 ---
 
-### Soal 3: 
+### Soal 3: Pengaturan Routing Internal dan Resolver Awal
 > Jaringan rahasia tidak akan berfungsi tanpa sinkronisasi antar divisi. Pastikan seluruh Entitas dapat saling terhubung dan berkomunikasi lintas jalur (routing internal via rootkit berfungsi). Untuk menghindari fragmentasi saat persiapan, pastikan setiap host non-router menambahkan resolver 192.168.122.1 (tambah di file /etc/resolv.conf, kalau sudah pakai resolver itu tidak perlu memasukkan resolver google) saat antarmukanya aktif agar akses untuk mengunduh paket instalasi dari internet tersedia sejak awal beroperasi.
 
 #### Konfigurasi Resolver di Seluruh Node Non-Router
@@ -321,7 +321,7 @@ apk update
 
 ---- 
 
-### Soal 4: 
+### Soal 4: Konfigurasi DNS Master-Slave dan Pembaruan Resolver
 > Penjaga Direktori mulai menuliskan hukum The Mesh. Pada node prab, bangun zona <xxxx>.com sebagai authoritative dengan SOA yang menunjuk ke prab.<xxxx>.com, serta tambahkan catatan NS untuk prab.<xxxx>.com dan tedd.<xxxx>.com. Buat A record untuk prab.<xxxx>.com dan tedd.<xxxx>.com yang mengarah ke alamat IP mereka masing-masing, serta A record apex <xxxx>.com yang mengarah ke gerbang aplikasi dinamis (penny). Aktifkan fitur notify dan allow-transfer ke tedd, lalu set forwarders ke 192.168.122.1. Di node tedd, tarik zona <xxxx>.com dari master dan pastikan server menjawab secara authoritative. Setelah fondasi nama ini berdiri kokoh, perbarui urutan resolver pada seluruh Entitas non-router menjadi: IP prab, IP tedd, lalu 192.168.122.1. Verifikasi bahwa query ke domain apex maupun hostname di dalam zona dijawab dengan benar oleh prab atau tedd.
 
 #### Install paket di prab dan tedd
@@ -544,7 +544,7 @@ ping -c 2 google.com
 
 ---
 
-### Soal 5: 
+### Soal 5: Pengaturan Hostname dan Domain Entitas System-Wide
 > "Entitas tanpa identitas adalah anomali," pesan Rootkit. Namai semua Entitas (hostname) sesuai glosarium: rootkit, alpha, beta, gamma, delta, epsilon, prab, tedd, abbey, penny, obladi, desmond, oblada, molly, dan verifikasi bahwa setiap host mengenali hostname tersebut secara system-wide. Buat setiap domain untuk masing-masing node sesuai dengan namanya (contoh: alpha.<xxxx>.com) dan assign IP masing-masing juga. Lakukan pengecualian untuk node yang bertanggung jawab atas prab dan tedd.
 
 #### Buat script hostname di semua node termasuk rootkit
@@ -883,7 +883,7 @@ dig AXFR K50.com @192.236.0.18
 
 ---
 
-### Soal 7: 
+### Soal 7: Konfigurasi Record DNS (A, CNAME) dan Kanonik
 > abbey dan penny sebagai gerbang utama, obladi dan desmond sebagai web statis, oblada dan molly sebagai web dinamis. Tambahkan pada zona <xxxx>.com A record untuk vault.<xxxx>.com (IP obladi & desmond), dan core.<xxxx>.com (IP oblada & molly). Tetapkan CNAME:
 www.<xxxx>.com → penny.<xxxx>.com
 static.<xxxx>.com → abbey.<xxxx>.com
@@ -1194,7 +1194,7 @@ File hasil transfer: /var/bind/sec/0.236.192.in-addr.arpa.zone di tedd
 
 ---
 
-### Soal 9:
+### Soal 9: Konfigurasi Web Server Statis (Apache) dengan Autoindex
 > Jalankan layanan web statis pada hostname di node area vault (menggunakan apache). Buka folder direktori /arsip/ dan aktifkan fitur autoindex (directory listing) pada konfigurasi Apache sehingga seluruh daftar file di dalamnya dapat ditelusuri langsung dari browser. Akses pengujian harus dilakukan melalui hostname, bukan IP address.
 
 Apache dipasang di obladi dan desmond (area vault). Folder /arsip/ dibuat di document root dengan autoindex aktif, lalu diuji lewat hostname.
@@ -1315,7 +1315,7 @@ curl -s http://desmond.K50.com/arsip/data.txt
 
 ---
 
-### Soal 10:
+### Soal 10: Konfigurasi Web Server Dinamis (Nginx & PHP-FPM) dengan URL Rewrite
 > Jalankan layanan web dinamis (PHP-FPM) pada hostname di node core (menggunakan nginx). Buat sebuah aplikasi sederhana yang memuat halaman beranda dan halaman profil. Terapkan aturan rewrite pada server sehingga akses ke /profil dapat berfungsi dengan URL bersih (tanpa akhiran .php). Akses pengujian wajib dilakukan melalui hostname.
 
 Nginx dan PHP-FPM dipasang di oblada dan molly (area core). Aplikasi punya halaman beranda dan profil, dan /profil bisa diakses tanpa .php lewat rewrite. Pengujian dilakukan lewat hostname.
