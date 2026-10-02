@@ -70,8 +70,6 @@ chmod +x /root/soal11-penny-proxy.sh
 sh /root/soal11-penny-proxy.sh
 ```
 
-<!-- SS: output httpd -t (Syntax OK) dan netstat (LISTEN :80) di penny -->
-
 #### Buktikan Penny mendistribusikan trafik ke obladi & desmond (dari alpha)
 
 ```bash
@@ -79,8 +77,6 @@ for i in 1 2 3 4; do curl -s http://penny.K50.com/arsip/laporan.txt; done
 ```
 
 Hasil bergantian `laporan dari obladi` dan `laporan dari desmond`, artinya kedua BalancerMember sama-sama dipakai.
-
-<!-- SS: hasil curl loop di atas -->
 
 #### Konfigurasi Abbey (Nginx → area core)
 
@@ -137,8 +133,6 @@ chmod +x /root/soal11-abbey-proxy.sh
 sh /root/soal11-abbey-proxy.sh
 ```
 
-<!-- SS: output nginx -t (syntax OK) dan netstat (LISTEN :80) di abbey -->
-
 #### Buktikan Abbey mendistribusikan trafik ke oblada & molly (dari alpha)
 
 ```bash
@@ -146,7 +140,5 @@ for i in 1 2 3 4; do curl -s http://abbey.K50.com/ | grep "Dilayani"; done
 ```
 
 Hasil bergantian `Dilayani oleh: molly` dan `Dilayani oleh: oblada`, artinya kedua anggota upstream sama-sama dipakai.
-
-<!-- SS: hasil curl loop di atas -->
 
 ---

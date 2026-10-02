@@ -75,8 +75,6 @@ chmod +x /root/soal12-penny-admin-auth.sh
 sh /root/soal12-penny-admin-auth.sh
 ```
 
-<!-- SS 12.1: output httpd -t (Syntax OK) dan isi .htpasswd (hash password) -->
-
 #### Buktikan /admin menolak tanpa kredensial dan menerima kredensial yang benar
 
 ```bash
@@ -91,7 +89,5 @@ curl -s -u 'prabs:pakar_pinter_jadi_gob***' http://penny.K50.com/admin/
 ```
 
 Hasil terbukti: `401` tanpa kredensial, `401` dengan kredensial salah, dan `200` dengan isi halaman admin tampil saat kredensial benar (`prabs` / `pakar_pinter_jadi_gob***`).
-
-<!-- SS 12.2: hasil tiga curl di atas, 401/401/200 -->
 
 ---

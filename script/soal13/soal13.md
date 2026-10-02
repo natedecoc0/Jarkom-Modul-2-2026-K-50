@@ -64,8 +64,6 @@ chmod +x /root/soal13-penny-canonical.sh
 sh /root/soal13-penny-canonical.sh
 ```
 
-<!-- SS 13.1: httpd -t (Syntax OK) dan netstat masih listen :80 -->
-
 #### Konfigurasi Abbey (redirect 302 ke static.K50.com)
 
 ```bash
@@ -119,8 +117,6 @@ chmod +x /root/soal13-abbey-canonical.sh
 sh /root/soal13-abbey-canonical.sh
 ```
 
-<!-- SS 13.2: nginx -t (syntax OK) dan netstat masih listen :80 -->
-
 #### Buktikan redirect bekerja (dari alpha)
 
 ```bash
@@ -144,8 +140,5 @@ curl -s -I http://192.236.0.34/
 ```
 
 Hasil terbukti: `www.K50.com` dan `static.K50.com` tetap jalan normal (load balancing tidak terganggu), sementara `penny.K50.com` dan IP `192.236.0.38` sama-sama balas `301 Moved Permanently` dengan `Location: http://www.K50.com/`, dan `abbey.K50.com` beserta IP `192.236.0.34` sama-sama balas `302 Found` dengan `Location: http://static.K50.com/`.
-
-<!-- SS 13.3: hasil curl www.K50.com dan curl -I penny.K50.com + curl -I 192.236.0.38 (dua-duanya 301) -->
-<!-- SS 13.4: hasil curl static.K50.com dan curl -I abbey.K50.com + curl -I 192.236.0.34 (dua-duanya 302) -->
 
 ---

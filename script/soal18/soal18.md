@@ -172,13 +172,3 @@ dig @127.0.0.1 abbey.K50.com A +short
 ```
 
 Hasil: serial 2026100106, IP `203.0.113.191`, identik dengan prab.
-
-### Screenshot
-
-<!-- TODO: SS 18.1 - dig abbey.K50.com di prab, TTL 15, IP lama -->
-<!-- TODO: SS 18.2 - dig SOA di tedd, serial tersinkron -->
-<!-- TODO: SS 18.3 - fase 1 di alpha, date + dig, IP lama TTL 15 -->
-<!-- TODO: SS 18.4 - output script ganti IP fiktif di prab -->
-<!-- TODO: SS 18.5 - fase 2 di alpha, date + dig, IP lama TTL turun (9) -->
-<!-- TODO: SS 18.6 - fase 3 di alpha, date + dig, IP fiktif TTL 15 -->
-<!-- TODO: SS 18.7 - dig SOA + A di tedd, serial dan IP fiktif tersinkron -->

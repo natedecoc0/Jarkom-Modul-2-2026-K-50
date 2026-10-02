@@ -163,11 +163,3 @@ curl -s http://www.K50.com/arsip/laporan.txt
 ```
 
 Hasil: `/eternal` menampilkan halaman dengan timestamp dan hostname yang ter-render server-side (bukti PHP jalan), `/orion` menampilkan halaman statis, `/admin` tetap 401, dan `/arsip/laporan.txt` tetap terbaca normal.
-
-### Screenshot
-
-<!-- TODO: SS 15.1 - httpd -t OK + status service Penny -->
-<!-- TODO: SS 15.2 - nginx -t OK + status service Abbey -->
-<!-- TODO: SS 15.3 - curl /eternal/, PHP ter-render dengan timestamp -->
-<!-- TODO: SS 15.4 - curl /orion/, halaman statis -->
-<!-- TODO: SS 15.5 - curl /admin/ (401) dan /arsip/laporan.txt, bukti path lama gak terganggu -->

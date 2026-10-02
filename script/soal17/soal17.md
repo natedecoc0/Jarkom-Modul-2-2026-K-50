@@ -86,8 +86,3 @@ dig @127.0.0.1 epsilon.K50.com TXT +short
 ```
 
 Hasil: di prab, seluruh lima TXT record (alpha, beta, gamma, delta, epsilon) mengembalikan nama hostname masing-masing. Di tedd, SOA serial terbaca 2026100102 (sesuai master) dan TXT record tersinkron identik, membuktikan zone transfer master-slave berjalan normal.
-
-### Screenshot
-
-<!-- TODO: SS 17.1 - output named-checkzone OK + hasil dig TXT dari prab untuk kelima client -->
-<!-- TODO: SS 17.2 - output dig SOA di tedd (serial 2026100102) dan dig TXT, bukti tersinkron -->

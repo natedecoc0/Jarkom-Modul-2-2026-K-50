@@ -30,8 +30,6 @@ chmod +x /root/soal14-vault-reallog.sh
 sh /root/soal14-vault-reallog.sh
 ```
 
-<!-- SS 14.1: httpd -t (Syntax OK) di obladi & desmond -->
-
 #### Konfigurasi oblada & molly (Nginx)
 
 ```bash
@@ -77,8 +75,6 @@ chmod +x /root/soal14-core-reallog.sh
 sh /root/soal14-core-reallog.sh
 ```
 
-<!-- SS 14.2: nginx -t (syntax OK) di oblada & molly -->
-
 #### Buktikan access log mencatat IP asli (dari alpha)
 
 ```bash
@@ -93,4 +89,6 @@ tail -5 /var/log/apache2/access_real.log    # obladi, desmond
 tail -5 /var/log/nginx/access_real.log      # oblada, molly
 ```
 
-Hasil terbukti: keempat backend (obladi, desmond, oblada, molly) mencatat `192.236.0.2` (IP alpha, pengunjung asli) dengan status `200` di `access_real.log`-nya masing-masing, bukan
+Hasil terbukti: keempat backend (obladi, desmond, oblada, molly) mencatat `192.236.0.2` (IP alpha, pengunjung asli) dengan status `200` di `access_real.log`-nya masing-masing, bukan IP Penny (`192.236.0.38`) ataupun Abbey (`192.236.0.34`).
+
+---
