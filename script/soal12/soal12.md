@@ -1,5 +1,3 @@
----
-
 ### Soal 12: Basic Authentication pada Path /admin (Penny)
 > Terdapat ruang khusus di penny yang yang menyimpan dokumen rahasia sindikat, oleh karena itu terapkan perlindungan basic authentication untuk path /admin. Akses ke jalur tersebut harus menolak pengunjung tanpa kredensial, dan hanya mengizinkan masuk jika menggunakan credential berikut:
 >

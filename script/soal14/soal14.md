@@ -1,5 +1,3 @@
----
-
 ### Soal 14: Access Log Mencatat IP Asli Pengunjung
 > Di dalam The Mesh, rekam jejak tidak boleh dipalsukan oleh sistem. Pastikan access log pada setiap server web di area vault maupun area core mencatat alamat IP asli milik client (pengunjung) yang diteruskan oleh gerbang, dan bukan mencatat IP dari Penny ataupun Abbey.
 
