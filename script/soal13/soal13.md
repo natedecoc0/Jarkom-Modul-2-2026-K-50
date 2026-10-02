@@ -62,6 +62,13 @@ chmod +x /root/soal13-penny-canonical.sh
 sh /root/soal13-penny-canonical.sh
 ```
 
+```
+Syntax OK
+===== config OK =====
+===== status service =====
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN
+```
+
 #### Konfigurasi Abbey (redirect 302 ke static.K50.com)
 
 ```bash
@@ -115,6 +122,14 @@ chmod +x /root/soal13-abbey-canonical.sh
 sh /root/soal13-abbey-canonical.sh
 ```
 
+```
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+===== config OK =====
+===== status service =====
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN
+```
+
 #### Buktikan redirect bekerja (dari alpha)
 
 ```bash
@@ -135,6 +150,38 @@ curl -s -I http://abbey.K50.com/
 
 echo "===== IP abbey langsung (harus 302 juga) ====="
 curl -s -I http://192.236.0.34/
+```
+
+```
+===== www.K50.com (harus normal, load balancing tetap jalan) =====
+laporan dari obladi
+===== penny.K50.com (harus 301 ke www.K50.com) =====
+HTTP/1.1 301 Moved Permanently
+Date: Fri, 02 Oct 2026 14:10:02 GMT
+Server: Apache/2.4.65 (Alpine)
+Location: http://www.K50.com/
+Content-Type: text/html; charset=iso-8859-1
+
+===== IP penny langsung (harus 301 juga) =====
+HTTP/1.1 301 Moved Permanently
+Date: Fri, 02 Oct 2026 14:10:02 GMT
+Server: Apache/2.4.65 (Alpine)
+Location: http://www.K50.com/
+Content-Type: text/html; charset=iso-8859-1
+
+===== static.K50.com (harus normal, proxy ke core) =====
+Dilayani oleh: molly
+===== abbey.K50.com (harus 302 ke static.K50.com) =====
+HTTP/1.1 302 Found
+Date: Fri, 02 Oct 2026 14:10:03 GMT
+Server: nginx/1.26.2
+Location: http://static.K50.com/
+
+===== IP abbey langsung (harus 302 juga) =====
+HTTP/1.1 302 Found
+Date: Fri, 02 Oct 2026 14:10:03 GMT
+Server: nginx/1.26.2
+Location: http://static.K50.com/
 ```
 
 Hasil terbukti: `www.K50.com` dan `static.K50.com` tetap jalan normal (load balancing tidak terganggu), sementara `penny.K50.com` dan IP `192.236.0.38` sama-sama balas `301 Moved Permanently` dengan `Location: http://www.K50.com/`, dan `abbey.K50.com` beserta IP `192.236.0.34` sama-sama balas `302 Found` dengan `Location: http://static.K50.com/`.

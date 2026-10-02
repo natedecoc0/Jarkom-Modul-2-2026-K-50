@@ -28,6 +28,13 @@ chmod +x /root/soal14-vault-reallog.sh
 sh /root/soal14-vault-reallog.sh
 ```
 
+```
+Syntax OK
+===== config OK =====
+===== status service =====
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN
+```
+
 #### Konfigurasi oblada & molly (Nginx)
 
 ```bash
@@ -73,6 +80,14 @@ chmod +x /root/soal14-core-reallog.sh
 sh /root/soal14-core-reallog.sh
 ```
 
+```
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+===== config OK =====
+===== status service =====
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN
+```
+
 #### Buktikan access log mencatat IP asli (dari alpha)
 
 ```bash
@@ -85,6 +100,18 @@ Cek log di tiap backend:
 ```bash
 tail -5 /var/log/apache2/access_real.log    # obladi, desmond
 tail -5 /var/log/nginx/access_real.log      # oblada, molly
+```
+
+```
+192.236.0.2 - - [02/Oct/2026:14:15:01 +0000] "GET /arsip/laporan.txt HTTP/1.1" 200 20
+192.236.0.2 - - [02/Oct/2026:14:15:01 +0000] "GET /arsip/laporan.txt HTTP/1.1" 200 20
+192.236.0.2 - - [02/Oct/2026:14:15:02 +0000] "GET /arsip/laporan.txt HTTP/1.1" 200 21
+192.236.0.2 - - [02/Oct/2026:14:15:02 +0000] "GET /arsip/laporan.txt HTTP/1.1" 200 21
+
+192.236.0.2 - - [02/Oct/2026:14:15:05 +0000] "GET / HTTP/1.1" 200 298
+192.236.0.2 - - [02/Oct/2026:14:15:05 +0000] "GET / HTTP/1.1" 200 296
+192.236.0.2 - - [02/Oct/2026:14:15:06 +0000] "GET / HTTP/1.1" 200 298
+192.236.0.2 - - [02/Oct/2026:14:15:06 +0000] "GET / HTTP/1.1" 200 296
 ```
 
 Hasil terbukti: keempat backend (obladi, desmond, oblada, molly) mencatat `192.236.0.2` (IP alpha, pengunjung asli) dengan status `200` di `access_real.log`-nya masing-masing, bukan IP Penny (`192.236.0.38`) ataupun Abbey (`192.236.0.34`).

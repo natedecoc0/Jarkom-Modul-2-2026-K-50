@@ -61,6 +61,12 @@ named-checkzone K50.com /var/bind/pri/K50.com.zone
 rndc reload K50.com
 ```
 
+```
+zone K50.com/IN: loaded serial 2026100105
+OK
+server reload successful
+```
+
 ### Konfigurasi Prab (ganti ke IP fiktif)
 
 ```bash
@@ -128,6 +134,17 @@ chmod +x /root/soal18-step4-prab-fakeip.sh
 sh /root/soal18-step4-prab-fakeip.sh
 ```
 
+```
+IP fiktif yang dipakai: 203.0.113.191
+zone K50.com/IN: loaded serial 2026100106
+OK
+server reload successful
+
+; <<>> DiG 9.18.33 <<>> @127.0.0.1 abbey.K50.com A
+;; ANSWER SECTION:
+abbey.K50.com.          15      IN      A       203.0.113.191
+```
+
 ### Konfigurasi Alpha (caching resolver untuk verifikasi)
 
 ```bash
@@ -154,6 +171,10 @@ chmod +x /root/recovery-alpha-resolver.sh
 sh /root/recovery-alpha-resolver.sh
 ```
 
+```
+(dnsmasq jalan tanpa output, proses background)
+```
+
 ### Hasil Verifikasi 3 Fase (query lewat dnsmasq di Alpha)
 
 | Fase | Waktu (UTC) | IP | TTL | Keterangan |
@@ -169,6 +190,11 @@ Perubahan di authoritative (prab) terjadi di antara fase 1 dan fase 2, pukul 05:
 ```bash
 dig @127.0.0.1 K50.com SOA +short
 dig @127.0.0.1 abbey.K50.com A +short
+```
+
+```
+2026100106
+203.0.113.191
 ```
 
 Hasil: serial 2026100106, IP `203.0.113.191`, identik dengan prab.

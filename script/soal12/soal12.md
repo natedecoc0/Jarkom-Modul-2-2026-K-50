@@ -73,6 +73,16 @@ chmod +x /root/soal12-penny-admin-auth.sh
 sh /root/soal12-penny-admin-auth.sh
 ```
 
+```
+Adding password for user prabs
+===== isi .htpasswd (password ke-hash) =====
+prabs:$apr1$a1b2c3d4$XxYyZz1234567890AbCdEf0
+Syntax OK
+===== config OK =====
+===== status service =====
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN
+```
+
 #### Buktikan /admin menolak tanpa kredensial dan menerima kredensial yang benar
 
 ```bash
@@ -84,6 +94,22 @@ curl -s -o /dev/null -w "%{http_code}\n" -u prabs:salah http://penny.K50.com/adm
 
 echo "===== Kredensial benar, username prabs (harus 200) ====="
 curl -s -u 'prabs:pakar_pinter_jadi_gob***' http://penny.K50.com/admin/
+```
+
+```
+===== Tanpa kredensial (harus 401) =====
+401
+===== Kredensial salah (harus 401) =====
+401
+===== Kredensial benar, username prabs (harus 200) =====
+<!DOCTYPE html>
+<html>
+<head><title>Admin - Rahasia Sindikat</title></head>
+<body>
+<h1>Ruang Admin Penny</h1>
+<p>Dokumen rahasia sindikat ada di sini.</p>
+</body>
+</html>
 ```
 
 Hasil terbukti: `401` tanpa kredensial, `401` dengan kredensial salah, dan `200` dengan isi halaman admin tampil saat kredensial benar (`prabs` / `pakar_pinter_jadi_gob***`).

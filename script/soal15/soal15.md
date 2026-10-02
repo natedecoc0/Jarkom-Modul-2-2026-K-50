@@ -90,6 +90,10 @@ chmod +x /root/soal15-penny-eternal.sh
 sh /root/soal15-penny-eternal.sh
 ```
 
+```
+Syntax OK
+```
+
 ### Konfigurasi Abbey (`/orion`)
 
 ```bash
@@ -153,6 +157,11 @@ chmod +x /root/soal15-abbey-orion.sh
 sh /root/soal15-abbey-orion.sh
 ```
 
+```
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+
 ### Verifikasi
 
 ```bash
@@ -160,6 +169,28 @@ curl -s http://www.K50.com/eternal/
 curl -s http://static.K50.com/orion/
 curl -s -o /dev/null -w "%{http_code}\n" http://www.K50.com/admin/
 curl -s http://www.K50.com/arsip/laporan.txt
+```
+
+```
+<!DOCTYPE html>
+<html>
+<head><title>Eternal</title></head>
+<body>
+<h1>/eternal di Penny</h1>
+<p>PHP berhasil dieksekusi. Waktu server: 2026-10-02 14:20:11</p>
+<p>Hostname: penny</p>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head><title>Orion</title></head>
+<body>
+<h1>/orion di Abbey</h1>
+<p>Ini halaman statis murni, tidak ada rendering PHP.</p>
+</body>
+</html>
+401
+laporan dari desmond
 ```
 
 Hasil: `/eternal` menampilkan halaman dengan timestamp dan hostname yang ter-render server-side (bukti PHP jalan), `/orion` menampilkan halaman statis, `/admin` tetap 401, dan `/arsip/laporan.txt` tetap terbaca normal.

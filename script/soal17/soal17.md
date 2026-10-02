@@ -77,12 +77,30 @@ chmod +x /root/soal17-prab-txt.sh
 sh /root/soal17-prab-txt.sh
 ```
 
+```
+zone K50.com/IN: loaded serial 2026100102
+OK
+server reload successful
+===== cek dari prab sendiri =====
+"alpha"
+"beta"
+"gamma"
+"delta"
+"epsilon"
+```
+
 ### Verifikasi
 
 ```bash
 dig @127.0.0.1 K50.com SOA +short
 dig @127.0.0.1 alpha.K50.com TXT +short
 dig @127.0.0.1 epsilon.K50.com TXT +short
+```
+
+```
+2026100102
+"alpha"
+"epsilon"
 ```
 
 Hasil: di prab, seluruh lima TXT record (alpha, beta, gamma, delta, epsilon) mengembalikan nama hostname masing-masing. Di tedd, SOA serial terbaca 2026100102 (sesuai master) dan TXT record tersinkron identik, membuktikan zone transfer master-slave berjalan normal.

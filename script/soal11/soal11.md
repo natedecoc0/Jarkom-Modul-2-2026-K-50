@@ -68,10 +68,24 @@ chmod +x /root/soal11-penny-proxy.sh
 sh /root/soal11-penny-proxy.sh
 ```
 
+```
+Syntax OK
+===== config OK =====
+===== status service =====
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN
+```
+
 #### Buktikan Penny mendistribusikan trafik ke obladi & desmond (dari alpha)
 
 ```bash
 for i in 1 2 3 4; do curl -s http://penny.K50.com/arsip/laporan.txt; done
+```
+
+```
+laporan dari obladi
+laporan dari desmond
+laporan dari obladi
+laporan dari desmond
 ```
 
 Hasil bergantian `laporan dari obladi` dan `laporan dari desmond`, artinya kedua BalancerMember sama-sama dipakai.
@@ -131,10 +145,25 @@ chmod +x /root/soal11-abbey-proxy.sh
 sh /root/soal11-abbey-proxy.sh
 ```
 
+```
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+===== config OK =====
+===== status service =====
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN
+```
+
 #### Buktikan Abbey mendistribusikan trafik ke oblada & molly (dari alpha)
 
 ```bash
 for i in 1 2 3 4; do curl -s http://abbey.K50.com/ | grep "Dilayani"; done
+```
+
+```
+Dilayani oleh: oblada
+Dilayani oleh: molly
+Dilayani oleh: oblada
+Dilayani oleh: molly
 ```
 
 Hasil bergantian `Dilayani oleh: molly` dan `Dilayani oleh: oblada`, artinya kedua anggota upstream sama-sama dipakai.
