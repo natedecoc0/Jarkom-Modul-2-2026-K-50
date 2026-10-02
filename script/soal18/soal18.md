@@ -8,6 +8,75 @@
 
 Record `abbey` diberi TTL eksplisit 15 detik (menimpa default zone 3600 detik) supaya jendela pengujian singkat dan bisa diamati langsung. IP fiktif diambil dari blok `203.0.113.0/24` (TEST-NET-3, RFC 5737), blok yang memang dialokasikan untuk dokumentasi/contoh sehingga jelas fiktif namun tetap format IP valid. Setiap perubahan zone diikuti kenaikan serial SOA supaya tedd (slave) tersinkron lewat zone transfer.
 
+### Panduan Eksekusi Live (Timing)
+
+Soal ini satu-satunya yang butuh timing presisi karena jendela cache cuma 15 detik. Ada dua clock yang jalan bersamaan: clock cache di Alpha (mulai ngitung mundur dari detik dig pertama kali di fase 1, berhenti pas TTL habis) dan clock perubahan di Prab (kapan saja, begitu script dijalankan authoritative langsung punya data baru). Perubahan di Prab harus terjadi setelah fase 1 tapi sebelum 15 detik dari fase 1 habis, supaya saat fase 2 nanya ke Alpha, authoritative sudah punya jawaban baru tapi cache Alpha masih menyimpan yang lama.
+
+**Langkah A — di Alpha, fase 1 (mulai hitungan):**
+```bash
+date; dig @127.0.0.1 abbey.K50.com A
+```
+```
+Fri Oct  2 22:50:10 UTC 2026
+;; ANSWER SECTION:
+abbey.K50.com.          15      IN      A       192.236.0.34
+```
+Query pertama, cache Alpha baru mulai menyimpan, TTL penuh 15.
+
+**Langkah B — segera pindah ke Prab, jalankan script ganti IP fiktif (target selesai ±5 detik dari Langkah A):**
+```bash
+sh /root/soal18-step4-prab-fakeip.sh
+```
+```
+IP fiktif yang dipakai: 203.0.113.191
+zone K50.com/IN: loaded serial 2026100106
+OK
+server reload successful
+
+;; ANSWER SECTION:
+abbey.K50.com.          15      IN      A       203.0.113.191
+```
+Dig di akhir script ini query langsung ke Prab (authoritative), jadi walau cache Alpha belum berubah, Prab sendiri sudah pasti menunjuk IP baru.
+
+**Langkah C — balik ke Alpha, fase 2 (harus masih dalam 15 detik dari Langkah A):**
+```bash
+date; dig @127.0.0.1 abbey.K50.com A
+```
+```
+Fri Oct  2 22:50:16 UTC 2026
+;; ANSWER SECTION:
+abbey.K50.com.          9       IN      A       192.236.0.34
+```
+Masih IP lama, tapi TTL sudah turun (15 dikurangi detik yang lewat sejak fase 1, bukan reset). Ini bukti paling penting: authoritative sudah beda, tapi client masih percaya cache.
+
+**Langkah D — tunggu sampai total waktu sejak Langkah A lewat 15 detik:**
+```bash
+sleep 10
+```
+
+**Langkah E — fase 3, query ulang di Alpha:**
+```bash
+date; dig @127.0.0.1 abbey.K50.com A
+```
+```
+Fri Oct  2 22:50:27 UTC 2026
+;; ANSWER SECTION:
+abbey.K50.com.          15      IN      A       203.0.113.191
+```
+Cache sudah expired, dnsmasq nanya ulang ke prab/tedd, dapat IP fiktif, TTL fresh balik ke 15.
+
+**Langkah F — verifikasi Tedd ikut sinkron:**
+```bash
+dig @192.236.0.19 K50.com SOA +short
+dig @192.236.0.19 abbey.K50.com A +short
+```
+```
+2026100106
+203.0.113.191
+```
+
+Catatan praktis: siapkan dua terminal (Alpha dan Prab) berdampingan dari awal, jangan baru dibuka saat mulai, supaya perpindahan Langkah A→B→C tidak kebuang waktu. Perpindahan B ke C adalah bagian paling kritis — kalau kelewat 15 detik, fase 2 ikut menangkap IP baru juga (karena cache keburu expired), dan pembuktian "masih cache"-nya jadi tidak kelihatan. Kalau itu terjadi saat live, tinggal ulang dari Langkah A lagi.
+
 ### Konfigurasi Prab (master, TTL 15 pada abbey)
 
 ```bash
