@@ -1,1 +1,0 @@
-sh /root/set-host.sh alpha 192.236.0.2

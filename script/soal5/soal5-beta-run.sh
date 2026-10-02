@@ -1,1 +1,0 @@
-sh /root/set-host.sh beta 192.236.0.3

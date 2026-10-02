@@ -1,1 +1,0 @@
-sh /root/set-host.sh oblada 192.236.0.28

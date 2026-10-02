@@ -1,1 +1,0 @@
-sh /root/set-host.sh gamma 192.236.0.4

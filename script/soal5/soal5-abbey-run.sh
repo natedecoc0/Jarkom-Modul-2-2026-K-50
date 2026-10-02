@@ -1,1 +1,0 @@
-sh /root/set-host.sh abbey 192.236.0.34
