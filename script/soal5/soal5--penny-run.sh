@@ -1,0 +1,1 @@
+sh /root/set-host.sh penny 192.236.0.38

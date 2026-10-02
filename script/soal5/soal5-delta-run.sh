@@ -1,0 +1,1 @@
+sh /root/set-host.sh delta 192.236.0.10

@@ -1,0 +1,1 @@
+sh /root/set-host.sh rootkit 192.236.0.1

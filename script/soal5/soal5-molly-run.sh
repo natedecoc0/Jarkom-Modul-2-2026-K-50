@@ -1,0 +1,1 @@
+sh /root/set-host.sh molly 192.236.0.29

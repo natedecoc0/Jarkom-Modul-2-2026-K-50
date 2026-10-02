@@ -1,0 +1,1 @@
+sh /root/set-host.sh desmond 192.236.0.27

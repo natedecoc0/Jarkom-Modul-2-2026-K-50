@@ -1,0 +1,1 @@
+sh /root/set-host.sh epsilon 192.236.0.11

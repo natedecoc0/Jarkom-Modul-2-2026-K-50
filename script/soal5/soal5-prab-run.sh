@@ -1,0 +1,1 @@
+sh /root/set-host.sh prab 192.236.0.18

@@ -1,0 +1,1 @@
+sh /root/set-host.sh tedd 192.236.0.19
