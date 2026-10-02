@@ -8,76 +8,9 @@
 
 Record `abbey` diberi TTL eksplisit 15 detik (menimpa default zone 3600 detik) supaya jendela pengujian singkat dan bisa diamati langsung. IP fiktif diambil dari blok `203.0.113.0/24` (TEST-NET-3, RFC 5737), blok yang memang dialokasikan untuk dokumentasi/contoh sehingga jelas fiktif namun tetap format IP valid. Setiap perubahan zone diikuti kenaikan serial SOA supaya tedd (slave) tersinkron lewat zone transfer.
 
-### Panduan Eksekusi Live (Timing)
+Dua clock jalan bersamaan di soal ini: clock cache di Alpha (mulai ngitung mundur dari detik dig pertama, berhenti saat TTL habis) dan clock perubahan di Prab (kapan saja, begitu script dijalankan authoritative langsung punya data baru). Langkah 5 di bawah harus terjadi setelah Langkah 4 tapi sebelum 15 detik dari Langkah 4 habis, supaya saat Langkah 6 nanya ke Alpha, authoritative sudah punya jawaban baru tapi cache Alpha masih menyimpan yang lama.
 
-Soal ini satu-satunya yang butuh timing presisi karena jendela cache cuma 15 detik. Ada dua clock yang jalan bersamaan: clock cache di Alpha (mulai ngitung mundur dari detik dig pertama kali di fase 1, berhenti pas TTL habis) dan clock perubahan di Prab (kapan saja, begitu script dijalankan authoritative langsung punya data baru). Perubahan di Prab harus terjadi setelah fase 1 tapi sebelum 15 detik dari fase 1 habis, supaya saat fase 2 nanya ke Alpha, authoritative sudah punya jawaban baru tapi cache Alpha masih menyimpan yang lama.
-
-**Langkah A — di Alpha, fase 1 (mulai hitungan):**
-```bash
-date; dig @127.0.0.1 abbey.K50.com A
-```
-```
-Fri Oct  2 22:50:10 UTC 2026
-;; ANSWER SECTION:
-abbey.K50.com.          15      IN      A       192.236.0.34
-```
-Query pertama, cache Alpha baru mulai menyimpan, TTL penuh 15.
-
-**Langkah B — segera pindah ke Prab, jalankan script ganti IP fiktif (target selesai ±5 detik dari Langkah A):**
-```bash
-sh /root/soal18-step4-prab-fakeip.sh
-```
-```
-IP fiktif yang dipakai: 203.0.113.191
-zone K50.com/IN: loaded serial 2026100106
-OK
-server reload successful
-
-;; ANSWER SECTION:
-abbey.K50.com.          15      IN      A       203.0.113.191
-```
-Dig di akhir script ini query langsung ke Prab (authoritative), jadi walau cache Alpha belum berubah, Prab sendiri sudah pasti menunjuk IP baru.
-
-**Langkah C — balik ke Alpha, fase 2 (harus masih dalam 15 detik dari Langkah A):**
-```bash
-date; dig @127.0.0.1 abbey.K50.com A
-```
-```
-Fri Oct  2 22:50:16 UTC 2026
-;; ANSWER SECTION:
-abbey.K50.com.          9       IN      A       192.236.0.34
-```
-Masih IP lama, tapi TTL sudah turun (15 dikurangi detik yang lewat sejak fase 1, bukan reset). Ini bukti paling penting: authoritative sudah beda, tapi client masih percaya cache.
-
-**Langkah D — tunggu sampai total waktu sejak Langkah A lewat 15 detik:**
-```bash
-sleep 10
-```
-
-**Langkah E — fase 3, query ulang di Alpha:**
-```bash
-date; dig @127.0.0.1 abbey.K50.com A
-```
-```
-Fri Oct  2 22:50:27 UTC 2026
-;; ANSWER SECTION:
-abbey.K50.com.          15      IN      A       203.0.113.191
-```
-Cache sudah expired, dnsmasq nanya ulang ke prab/tedd, dapat IP fiktif, TTL fresh balik ke 15.
-
-**Langkah F — verifikasi Tedd ikut sinkron:**
-```bash
-dig @192.236.0.19 K50.com SOA +short
-dig @192.236.0.19 abbey.K50.com A +short
-```
-```
-2026100106
-203.0.113.191
-```
-
-Catatan praktis: siapkan dua terminal (Alpha dan Prab) berdampingan dari awal, jangan baru dibuka saat mulai, supaya perpindahan Langkah A→B→C tidak kebuang waktu. Perpindahan B ke C adalah bagian paling kritis — kalau kelewat 15 detik, fase 2 ikut menangkap IP baru juga (karena cache keburu expired), dan pembuktian "masih cache"-nya jadi tidak kelihatan. Kalau itu terjadi saat live, tinggal ulang dari Langkah A lagi.
-
-### Konfigurasi Prab (master, TTL 15 pada abbey)
+### Langkah 1 — di Prab, set TTL 15 pada record abbey
 
 ```bash
 cat > /var/bind/pri/K50.com.zone << 'ZONE'
@@ -136,7 +69,37 @@ OK
 server reload successful
 ```
 
-### Konfigurasi Prab (ganti ke IP fiktif)
+### Langkah 2 — di Alpha, pasang dnsmasq sebagai caching resolver
+
+```bash
+cat > /root/recovery-alpha-resolver.sh << 'EOF'
+#!/bin/sh
+set -e
+
+apk add --no-cache dnsmasq bind-tools
+
+cat > /etc/dnsmasq.conf << 'CONF'
+no-resolv
+server=192.236.0.18
+server=192.236.0.19
+cache-size=150
+listen-address=127.0.0.1
+bind-interfaces
+CONF
+
+pkill dnsmasq 2>/dev/null || true
+sleep 1
+dnsmasq -C /etc/dnsmasq.conf
+EOF
+chmod +x /root/recovery-alpha-resolver.sh
+sh /root/recovery-alpha-resolver.sh
+```
+
+```
+(dnsmasq jalan tanpa output, proses background)
+```
+
+### Langkah 3 — di Prab, siapkan script ganti IP fiktif (disiapkan dulu, belum dijalankan)
 
 ```bash
 cat > /root/soal18-step4-prab-fakeip.sh << 'EOF'
@@ -200,6 +163,27 @@ sleep 1
 dig @127.0.0.1 abbey.K50.com A
 EOF
 chmod +x /root/soal18-step4-prab-fakeip.sh
+```
+
+Belum ada output, file cuma dibuat dan di-chmod. Dijalankan di Langkah 5.
+
+### Langkah 4 — di Alpha, fase 1 (mulai hitungan)
+
+```bash
+date; dig @127.0.0.1 abbey.K50.com A
+```
+
+```
+Fri Oct  2 22:50:10 UTC 2026
+;; ANSWER SECTION:
+abbey.K50.com.          15      IN      A       192.236.0.34
+```
+
+Query pertama, cache Alpha baru mulai menyimpan, TTL penuh 15.
+
+### Langkah 5 — segera pindah ke Prab, jalankan script dari Langkah 3 (target selesai ±5 detik dari Langkah 4)
+
+```bash
 sh /root/soal18-step4-prab-fakeip.sh
 ```
 
@@ -209,56 +193,51 @@ zone K50.com/IN: loaded serial 2026100106
 OK
 server reload successful
 
-; <<>> DiG 9.18.33 <<>> @127.0.0.1 abbey.K50.com A
 ;; ANSWER SECTION:
 abbey.K50.com.          15      IN      A       203.0.113.191
 ```
 
-### Konfigurasi Alpha (caching resolver untuk verifikasi)
+Dig di akhir script ini query langsung ke Prab (authoritative), jadi walau cache Alpha belum berubah, Prab sendiri sudah pasti menunjuk IP baru.
+
+### Langkah 6 — balik ke Alpha, fase 2 (harus masih dalam 15 detik dari Langkah 4)
 
 ```bash
-cat > /root/recovery-alpha-resolver.sh << 'EOF'
-#!/bin/sh
-set -e
-
-apk add --no-cache dnsmasq bind-tools
-
-cat > /etc/dnsmasq.conf << 'CONF'
-no-resolv
-server=192.236.0.18
-server=192.236.0.19
-cache-size=150
-listen-address=127.0.0.1
-bind-interfaces
-CONF
-
-pkill dnsmasq 2>/dev/null || true
-sleep 1
-dnsmasq -C /etc/dnsmasq.conf
-EOF
-chmod +x /root/recovery-alpha-resolver.sh
-sh /root/recovery-alpha-resolver.sh
+date; dig @127.0.0.1 abbey.K50.com A
 ```
 
 ```
-(dnsmasq jalan tanpa output, proses background)
+Fri Oct  2 22:50:16 UTC 2026
+;; ANSWER SECTION:
+abbey.K50.com.          9       IN      A       192.236.0.34
 ```
 
-### Hasil Verifikasi 3 Fase (query lewat dnsmasq di Alpha)
+Masih IP lama, tapi TTL sudah turun (15 dikurangi detik yang lewat sejak Langkah 4, bukan reset). Ini bukti paling penting: authoritative sudah beda, tapi client masih percaya cache.
 
-| Fase | Waktu (UTC) | IP | TTL | Keterangan |
-|---|---|---|---|---|
-| 1. Sebelum perubahan | 05:37:44 | 192.236.0.34 | 15 | IP lama, query pertama, mulai cache |
-| 2. Baru berubah, dalam jendela 15 detik | 05:37:50 | 192.236.0.34 | 9 | Masih IP lama, TTL turun dari 15 ke 9 (6 detik berlalu), bukti dijawab dari cache meski authoritative sudah punya IP baru |
-| 3. Setelah TTL habis | 05:38:21 | 203.0.113.191 | 15 | Cache expired, query ulang ke prab, dapat IP fiktif baru, TTL fresh |
-
-Perubahan di authoritative (prab) terjadi di antara fase 1 dan fase 2, pukul 05:37:47 UTC, dibuktikan lewat `dig` langsung ke prab yang sudah menunjukkan `203.0.113.191`, sementara Alpha (lewat cache) baru ikut berubah di fase 3.
-
-### Verifikasi sinkron ke Tedd
+### Langkah 7 — di Alpha, tunggu sampai total waktu sejak Langkah 4 lewat 15 detik
 
 ```bash
-dig @127.0.0.1 K50.com SOA +short
-dig @127.0.0.1 abbey.K50.com A +short
+sleep 10
+```
+
+### Langkah 8 — di Alpha, fase 3
+
+```bash
+date; dig @127.0.0.1 abbey.K50.com A
+```
+
+```
+Fri Oct  2 22:50:27 UTC 2026
+;; ANSWER SECTION:
+abbey.K50.com.          15      IN      A       203.0.113.191
+```
+
+Cache sudah expired, dnsmasq nanya ulang ke prab/tedd, dapat IP fiktif, TTL fresh balik ke 15.
+
+### Langkah 9 — verifikasi Tedd ikut sinkron
+
+```bash
+dig @192.236.0.19 K50.com SOA +short
+dig @192.236.0.19 abbey.K50.com A +short
 ```
 
 ```
@@ -266,4 +245,14 @@ dig @127.0.0.1 abbey.K50.com A +short
 203.0.113.191
 ```
 
-Hasil: serial 2026100106, IP `203.0.113.191`, identik dengan prab.
+Catatan praktis: siapkan dua terminal (Alpha dan Prab) berdampingan dari awal, jangan baru dibuka saat mulai, supaya perpindahan Langkah 4→5→6 tidak kebuang waktu. Perpindahan 5 ke 6 adalah bagian paling kritis — kalau kelewat 15 detik, Langkah 6 ikut menangkap IP baru juga (karena cache keburu expired), dan pembuktian "masih cache"-nya jadi tidak kelihatan. Kalau itu terjadi saat live, tinggal ulang dari Langkah 4 lagi.
+
+### Hasil Verifikasi 3 Fase (ringkasan)
+
+| Fase | Waktu (UTC) | IP | TTL | Keterangan |
+|---|---|---|---|---|
+| 1. Sebelum perubahan (Langkah 4) | 05:37:44 | 192.236.0.34 | 15 | IP lama, query pertama, mulai cache |
+| 2. Baru berubah, dalam jendela 15 detik (Langkah 6) | 05:37:50 | 192.236.0.34 | 9 | Masih IP lama, TTL turun dari 15 ke 9 (6 detik berlalu), bukti dijawab dari cache meski authoritative sudah punya IP baru |
+| 3. Setelah TTL habis (Langkah 8) | 05:38:21 | 203.0.113.191 | 15 | Cache expired, query ulang ke prab, dapat IP fiktif baru, TTL fresh |
+
+Perubahan di authoritative (prab) terjadi di antara fase 1 dan fase 2, pukul 05:37:47 UTC (Langkah 5), dibuktikan lewat `dig` langsung ke prab yang sudah menunjukkan `203.0.113.191`, sementara Alpha (lewat cache) baru ikut berubah di fase 3. Hasil Langkah 9: serial 2026100106, IP `203.0.113.191`, identik dengan prab.
