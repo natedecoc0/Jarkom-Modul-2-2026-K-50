@@ -179,6 +179,8 @@ Fri Oct  2 22:50:10 UTC 2026
 abbey.K50.com.          15      IN      A       192.236.0.34
 ```
 
+![Fase 1, dig IP asli di Alpha](../../asset/soal18-digipreal.png)
+
 Query pertama, cache Alpha baru mulai menyimpan, TTL penuh 15.
 
 ### Langkah 5 — segera pindah ke Prab, jalankan script dari Langkah 3 (target selesai ±5 detik dari Langkah 4)
@@ -196,6 +198,8 @@ server reload successful
 ;; ANSWER SECTION:
 abbey.K50.com.          15      IN      A       203.0.113.191
 ```
+
+![Script ganti IP fiktif di Prab](../../asset/soal18-ipfiktif.png)
 
 Dig di akhir script ini query langsung ke Prab (authoritative), jadi walau cache Alpha belum berubah, Prab sendiri sudah pasti menunjuk IP baru.
 
@@ -231,6 +235,8 @@ Fri Oct  2 22:50:27 UTC 2026
 abbey.K50.com.          15      IN      A       203.0.113.191
 ```
 
+![Fase 3, dig IP fiktif di Alpha](../../asset/soal18-digipfiktif.png)
+
 Cache sudah expired, dnsmasq nanya ulang ke prab/tedd, dapat IP fiktif, TTL fresh balik ke 15.
 
 ### Langkah 9 — verifikasi Tedd ikut sinkron
@@ -244,6 +250,8 @@ dig @192.236.0.19 abbey.K50.com A +short
 2026100106
 203.0.113.191
 ```
+
+![Verifikasi sinkron ke Tedd](../../asset/soal18-verifikasitedd.png)
 
 Catatan praktis: siapkan dua terminal (Alpha dan Prab) berdampingan dari awal, jangan baru dibuka saat mulai, supaya perpindahan Langkah 4→5→6 tidak kebuang waktu. Perpindahan 5 ke 6 adalah bagian paling kritis — kalau kelewat 15 detik, Langkah 6 ikut menangkap IP baru juga (karena cache keburu expired), dan pembuktian "masih cache"-nya jadi tidak kelihatan. Kalau itu terjadi saat live, tinggal ulang dari Langkah 4 lagi.
 

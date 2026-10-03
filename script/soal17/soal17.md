@@ -103,4 +103,6 @@ dig @127.0.0.1 epsilon.K50.com TXT +short
 "epsilon"
 ```
 
+![Verifikasi soal 17](../../asset/soal17-verifikasi.png)
+
 Hasil: di prab, seluruh lima TXT record (alpha, beta, gamma, delta, epsilon) mengembalikan nama hostname masing-masing. Di tedd, SOA serial terbaca 2026100102 (sesuai master) dan TXT record tersinkron identik, membuktikan zone transfer master-slave berjalan normal.
